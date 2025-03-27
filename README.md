@@ -272,7 +272,7 @@ $$
 $$
 v=f(v)=\underset{\pi}{max}(r_\pi+\gamma P_\pi v)
 $$
-有
+有（书中有证明）
 $$
 ||f(x_1)-f(x_2)||\le\gamma ||x_1-x_2||
 \\ \gamma \quad is \quad the \quad discount \quad rate
@@ -305,9 +305,9 @@ $$
 
 ## **analyzing optimal policies**
 
-红色的量是model提供的已知的
+红色的量是model提供的已知的（概率）
 
-黑色的量是未知需要求解的（概率）
+黑色的量是未知需要求解的
 
 ![image-20250322145842051](pic/image-20250322145842051.png)
 
@@ -611,7 +611,7 @@ $$
 $$
 \underset{w}{min}\quad J(w)=\mathbb E[f(w,X)]
 \\g(w)=\nabla_wJ(w)=\mathbb E[\nabla_wf(w,X)]=0
-\\
+\\\widetilde g是测量数据x，含噪声
 \\\widetilde g(w,\eta)=\nabla_w f(w,x)
 \\
 \\=\mathbb E[\nabla_wf(w,X)]+\nabla_w f(w,x)-\mathbb E[\nabla_wf(w,X)]
@@ -662,8 +662,11 @@ SGD估计最慢，因为每次都是一个样本
 
 时序差分方法：model free，incremental / iterative
 
+求解BE和BOE
+
 ## TD learning of state values
 
+t指的是一个episode的时间步t
 $$
 data/experience
 \\(s_0,r_1,s_1....s_t,r_{t+1},s_{t+1}...) \quad or \quad {(s_t,r_{t+1},s_{t+1})}
@@ -676,7 +679,7 @@ v_t(s_t)是v_{\pi}(s_t)在t时刻的估计值
 \\
 \\v_{t+1}(s_t)=v_{t}(s_t)-\alpha_t(s_t)[v_{t}(s_t)-[r_{t+1}+\gamma v_{t}(s_{t+1})]]
 \\
-\\ v_{t+1}(s_t)=v_{t}(s_t)\quad \forall s\ne s_t
+\\ v_{t+1}(s)=v_{t}(s)\quad \forall s\ne s_t
 $$
 ![image-20250322200221678](pic/image-20250322200221678.png)
 
@@ -708,24 +711,512 @@ MC是无偏估计；方差大，因为只取一个episode，一个episode有很�
 
 ## TD learning of action values: Sarsa
 
+求解给定policy的Bellman equation
+$$
+q_{t+1}(s_t,a_t)=q_{t}(s_t,a_t)-\alpha_t(s_t,a_t)[q_{t}(s_t,a_t)-[r_{t+1}+\gamma q_{t}(s_{t+1},a_{t+1})]]
+\\
+\\ q_{t+1}(s,a)=q_{t}(s,a)\quad \forall (s,a)\ne (s_t,a_t)
+$$
+SARSA
+$$
+SARSA---experience
+\\(s_t,a_t,r_{t+1},s_{t+1},a_{t+1})
+$$
+这是Bellman equation的action value的版本（书中推导）
+$$
+q_{\pi}(s,a)=\mathbb E[R+\gamma q_{\pi}(S\prime ,A\prime)|s,a],\quad \forall s,a
+$$
+**伪代码**
 
+![image-20250323112939485](pic/image-20250323112939485.png)
 
+Sarsa在更新q之后立刻更新policy，此时不太准确，基于generalized policy iteration
 
+Policy iteration是经过很多步才更新完q的，所以最后更新policy更准确
 
 ## TD learning of action values: Expected Sarsa
 
+求解给定policy的Bellman equation
+$$
+q_{t+1}(s_t,a_t)=q_{t}(s_t,a_t)-\alpha_t(s_t,a_t)[q_{t}(s_t,a_t)-[r_{t+1}+\gamma \mathbb E[q_{t}(s_{t+1},A)]]]
+\\
+\\ q_{t+1}(s,a)=q_{t}(s,a)\quad \forall (s,a)\ne (s_t,a_t)
+\\where
+\\\mathbb E[q_{t}(s_{t+1},A)]=\sum_a\pi_t(a|s_{t+1})q_t(s_{t+1},a)=v_t(s_{t+1})
+$$
+也是一个Bellman equation
 
-
-
+![image-20250323115250010](pic/image-20250323115250010.png)
 
 ## TD learning of action values:  n-step Sarsa
 
+分解G的三种形式有：
 
+![image-20250323115556188](pic/image-20250323115556188.png)
 
+**n-step Sarsa**
 
+![image-20250323115746117](pic/image-20250323115746117.png)
+
+n-step Sarsa也不能直接更新q，需要等n step才能更新q
+
+![image-20250323120150784](pic/image-20250323120150784.png)
 
 ## TD learning of optimal action values: Q-learning
 
+**off-policy**
 
+直接估计optimal action values,无需policy evaluation 和policy improvement
+
+$$
+q_{t+1}(s_t,a_t)=q_{t}(s_t,a_t)-\alpha_t(s_t,a_t)[q_{t}(s_t,a_t)-[r_{t+1}+\gamma \underset{a\in A}{max}q_{t}(s_{t+1},a)]]
+\\
+\\ q_{t+1}(s,a)=q_{t}(s,a)\quad \forall (s,a)\ne (s_t,a_t)
+$$
+
+
+Q-learning就是求解BOE (书中有证明)
+$$
+q(s,a)=\mathbb E[R_{t+1}+\gamma \underset{a}{max} q(S_{t+1},a)|S_t=s,A_t=a],\quad \forall s,a
+$$
+**off-policy vs on-policy**
+
+behavior policy：生成experience samples
+
+target policy：持续向着optimal policy更新
+
+off-policy：behavior policy和target policy相同
+
+on-policy：behavior policy和target policy不同
+
+
+
+off-policy可以直接拿别的policy生成的experience samples学习
+
+**Sarsa**
+
+![image-20250323151840954](pic/image-20250323151840954.png)
+
+**MC**
+
+![image-20250323151942746](pic/image-20250323151942746.png)
+
+**Q-learning**
+
+![image-20250323152157148](pic/image-20250323152157148.png)
+
+**伪代码**
+
+**on-poliy流程**：根据policy生成experience samples，接着计算q，根据q使用e-greedy更新policy；循环往复
+
+e-greedy：希望policy生成experience samples时具有一定的探索性
+
+**![image-20250323152225224](pic/image-20250323152225224.png)**
+
+**off-poliy流程**：根据policy_b生成experience samples，接着计算q，根据q使用greedy更新policy_T；循环往复
+
+两个policy：policy_b；policy_T
+
+greedy：直接得到最优
+
+![image-20250323152452871](pic/image-20250323152452871.png)
+
+grid world例子：
+
+e越大，behavior policy探索性越强，几乎能访问到所有的(s,a)，最后能找到最优策略和所有s的最优策略
+
+e越小，behavior policy探索性越弱，只能访问到有限的(s,a)，最后只能找到一部分s对应的最优策略
 
 ## summary
+
+![image-20250323153620399](pic/image-20250323153620399.png)
+
+![image-20250323153646380](pic/image-20250323153646380.png)
+
+# ch8 value funcition approximation
+
+no-tabular representation / function representation 
+
+使用神经网络拟合参数
+$$
+\phi是feature \quad vector，w是parameter\quad vector
+\\\hat v(s,w)=as+b=[s,1][a,b]^T= \phi^T(s)w
+$$
+节省内存：不需要存储大量的(s,a)，只需要存储w
+
+强泛化能力：更新某一(s,a)时，只会更新w，这样其他(s,a)相应也会改变
+
+## state value estimation
+
+estimate state value
+
+**objective function**
+$$
+J(w)=\mathbb E[(v_{\pi}(S)-\hat v(S,w))^2]
+$$
+**stationary distribution**
+
+stationary/steady-state/limiting distribution
+$$
+J(w)=\mathbb E[(v_{\pi}(S)-\hat v(S,w))^2]=\sum_{s\in S}d_{\pi}(s)(v_{\pi}(s)-\hat v(s,w))^2
+\\
+\\d_{\pi}是长时间运行后S的稳定分布概率
+\\P是状态转移矩阵，因为当前状态（s）出现的概率=每一个状态出现的概率*每一状态到s的概率
+\\d_{\pi}^T=d_{\pi}^TP_{\pi}
+$$
+**optimization algorithm**
+
+![image-20250323161448979](pic/image-20250323161448979.png)
+
+化简得
+$$
+w_{t+1}=w_t+\alpha_t(v_{\pi}(s_t)-\hat v(s_t,w_t))\nabla_w\hat v(s_t,w_t)
+$$
+由于v_pi(t)是true state value，因此不可能事先知道，只能估计v_pi(t)
+
+![image-20250323161950708](pic/image-20250323161950708.png)
+
+**伪代码**
+
+![image-20250323162055480](pic/image-20250323162055480.png)
+
+**TD linear**
+
+使用线性的神经网络拟合V_pi
+
+![image-20250323162611510](pic/image-20250323162611510.png)
+
+缺点：选取合适的feature vector
+
+优点：tabular是linear function approximation的特殊情况
+
+## sarsa with funcition approximation
+
+estimate action value
+
+![image-20250323164156260](pic/image-20250323164156260.png)
+
+**伪代码**
+
+![image-20250323164344982](pic/image-20250323164344982.png)
+
+## Q-learning with funcition approximation
+
+estimate optimal action value
+
+![image-20250323164817278](pic/image-20250323164817278.png)
+
+**伪代码**
+
+![image-20250323164925074](pic/image-20250323164925074.png)
+
+## Deep Q-learning
+
+deep Q-network (DQN)
+
+estimate optimal action value
+
+**loss function**
+
+![image-20250323165439844](pic/image-20250323165439844.png)
+
+**two networks**
+
+因为计算梯度很复杂
+
+main network：实时更新；W
+
+target network：一段时间再更新；WT
+
+![image-20250323165723535](pic/image-20250323165723535.png)
+
+**experience replay**
+
+replay buffer
+
+收集到experience samples后，打乱顺序，均匀分布选择batch samples训练；因为experience samples是有顺序和关联的，为了保持随机性需要打乱和均匀分布。
+
+**伪代码**
+
+![image-20250323171214377](pic/image-20250323171214377.png)
+
+目标：找到所有(s,a)的optimal aciton values；一旦找到，optimal greedy policy就立刻找到了
+
+# ch9 policy gradient methods
+
+on-policy
+
+value-based--->policy-based
+$$
+policy是一个函数，\theta是一个parameter\quad vector
+\\\pi(a|s,\theta)
+$$
+![image-20250323183100836](pic/image-20250323183100836.png)
+
+## metrics to define optimal policies
+
+metrics就是loss function
+
+**first metric：average value**
+$$
+d(s)是s的分布概率
+\\\overline v_{\pi}=\sum_{s\in S}d(s)v_{\pi}(s)=d^Tv_{\pi}
+\\=\mathbb E[\sum_{t=0}^{\infty}\gamma^tR_{t+1}]
+$$
+![image-20250323185501724](pic/image-20250323185501724.png)
+
+d和policy没关系
+$$
+0代表d(s)的s分布概率和policy没有关系
+\\\overline v_{\pi}^0
+$$
+
+
+d和policy有关系
+
+d(s) is stationary distribution：稳定后的概率
+$$
+d_{\pi}^TP_{\pi}=d_{\pi}^T
+$$
+**second metric：average one-step reward**
+$$
+\overline r_{\pi}=\sum_{s\in S}d_{\pi}(s)r_{\pi}(s)=\mathbb E[r_{\pi}(S)]
+\\r_{\pi}(s)=\sum_{a\in A}\pi(a|s)r(s|a)
+\\r(s,a)=\mathbb E[R|s,a]=\sum_rrp(r|s,a)
+$$
+等价定义
+
+![image-20250323184610517](pic/image-20250323184610517.png)
+
+两个metrics等价，书中有证明
+$$
+\overline r_{\pi}=(1-\gamma)\overline v_{\pi}
+$$
+
+## gradients of the metrics
+
+gradient（证明在书中）
+$$
+\nabla_{\theta}J(\theta)=\sum_{s\in S}{\eta}(s)\sum_{a\in A}\nabla_{\theta}{\pi}(a|s,\theta)q_{\pi}(s,a)
+\\=\mathbb E[\nabla_{\theta}ln{\pi}(A|S,\theta)q_{\pi}(S,A)]
+$$
+![image-20250323185932532](pic/image-20250323185932532.png)
+
+![image-20250323190306800](pic/image-20250323190306800.png)
+
+![image-20250323190556982](pic/image-20250323190556982.png)
+
+## gradients-ascent algorithm (REINFORCE)
+
+![image-20250323190804384](pic/image-20250323190804384.png)
+$$
+由于q_{\pi}也不可能求出，因此对q采样：基于MC比如REINFORCE
+$$
+![image-20250323190904393](pic/image-20250323190904393.png)
+
+性质
+$$
+式子可以看作是对{\pi}优化
+\\{\beta}可以充分发挥exploration和exploitation
+\\q对应action大那么对应的action的{\pi}概率也增大：exploitation
+\\{\pi}对应action小则分配给对应aciton的{\pi}概率增大：exploration
+$$
+![image-20250323191514400](pic/image-20250323191514400.png)
+
+**伪代码**
+
+![image-20250323191957433](pic/image-20250323191957433.png)
+$$
+为什么用{\theta}_t采样数据而不是{\theta}_{t+1}呢
+\\因为这是基于MC的，MC是offline，必须等所有episode采样完成
+$$
+
+## 李宏毅
+
+Actor: policy
+
+**function的好处**
+
+t是trajectory
+
+max Return的期望值
+
+而每个Return出现的概率和theta有关
+
+采样N次的结果大致等价
+
+![image-20250326181828944](pic/image-20250326181828944.png)
+
+![image-20250326182255408](pic/image-20250326182255408.png)
+
+**选择function：gradient ascent**
+
+![image-20250326183038771](pic/image-20250326183038771.png)
+
+
+
+## Policy Gradient
+
+$$
+由于(a,s)数量很多，使用no-tabular来估计
+使用神经网络来估计{\pi}(a|s,\theta)
+\\maximizes\quad J(\theta)=\mathbb E_s[V(S,\theta)]
+$$
+
+![image-20250326190915418](pic/image-20250326190915418.png)
+
+![image-20250326190935986](pic/image-20250326190935986.png)
+
+![image-20250326191017897](pic/image-20250326191017897.png)
+
+![image-20250326191036676](pic/image-20250326191036676.png)
+
+![image-20250326191129202](pic/image-20250326191129202.png)
+
+### **REINFORCE with baseline**
+
+![image-20250326191154127](pic/image-20250326191154127.png)
+
+baseline: 降低方差，更快拟合
+$$
+MC近似期望A_t
+$$
+![image-20250326191806330](pic/image-20250326191806330.png)
+$$
+MC近似期望Q_{\pi}
+$$
+
+
+![image-20250326191909868](pic/image-20250326191909868.png)
+$$
+神经网络近似V_{\pi}value \quad network
+$$
+
+
+![image-20250326192054853](pic/image-20250326192054853.png)
+
+**policy network和value network**
+
+![image-20250326192444124](pic/image-20250326192444124.png)
+
+![image-20250326192806120](pic/image-20250326192806120.png)
+$$
+让价值网络v拟合到观测到的价值u_t
+$$
+![image-20250326192717179](pic/image-20250326192717179.png)
+
+LOSS函数
+
+使用交叉熵：可以判断y和y_hat的概率差距
+
+![image-20250326200256895](pic/image-20250326200256895.png)
+
+G_t是评价Y的，因为Y并不是真实正确的标签；
+
+G_t大，奖励就大，那么对应loss就越大，更重视
+
+![image-20250326221840740](pic/image-20250326221840740.png)
+
+### **actor-critic**
+
+![image-20250326191222808](pic/image-20250326191222808.png)
+$$
+值网络的loss函数是\frac {TD\quad error^2}{2}，最小化
+$$
+
+
+![image-20250326193539497](pic/image-20250326193539497.png)
+
+![image-20250326195126023](pic/image-20250326195126023.png)
+
+
+
+
+
+![image-20250326191350505](pic/image-20250326191350505.png)
+
+
+
+# ch10 Actor-Critic Methods
+
+actor: policy update
+
+critic: policy evaluation or value estimation
+
+## the simplest actor-critic (QAC)
+
+on-policy
+
+![image-20250323193155834](pic/image-20250323193155834.png)
+
+![image-20250323193259001](pic/image-20250323193259001.png)
+
+**算法**
+$$
+critic:SARSA+value \quad function
+\\actor:policy\quad update\quad algorithm
+$$
+![image-20250323193311539](pic/image-20250323193311539.png)
+
+## advantage actor-critic (A2C)
+
+引入偏置量baseline
+
+![image-20250323193918995](pic/image-20250323193918995.png)
+
+![image-20250323194105387](pic/image-20250323194105387.png)
+
+好处：使方差var(X)更小
+
+![image-20250323194718620](pic/image-20250323194718620.png)
+$$
+显然\delta比q更好，因为\delta考虑是相对值
+$$
+![image-20250323194817884](pic/image-20250323194817884.png)
+$$
+这样就可以只用一个神经网络近似v_t
+$$
+![image-20250323195042390](pic/image-20250323195042390.png)
+
+![image-20250323195146401](pic/image-20250323195146401.png)
+
+## off-policy actor-critic
+
+**importance sampling**
+
+将on-policy变成off-policy
+
+在比如神经网络中，很难计算p0，就需要用到importance sampling
+
+![image-20250323195930853](pic/image-20250323195930853.png)
+
+![image-20250323200016574](pic/image-20250323200016574.png)
+
+
+
+![image-20250323200504687](pic/image-20250323200504687.png)
+
+![image-20250323200555279](pic/image-20250323200555279.png)
+
+![image-20250323200719066](pic/image-20250323200719066.png)
+
+
+
+![image-20250323200741444](pic/image-20250323200741444.png)
+
+## deterministic actor-critic (DPG)
+
+![image-20250323200946567](pic/image-20250323200946567.png)
+
+梯度
+
+![image-20250323201110248](pic/image-20250323201110248.png)
+$$
+off-policy
+\\behavior\quad police \quad {\beta}
+\\target\quad policy\quad {\mu}
+\\也可以变成on-policy，{\beta}变成{\mu}+noise
+$$
+![image-20250323201334463](pic/image-20250323201334463.png)
+
+## Summary
