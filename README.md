@@ -1340,7 +1340,7 @@ $$
 ### **5. GAE在策略梯度中的应用**
 在策略梯度算法（如PPO）中，GAE用于计算优势估计，进而更新策略：
 $$
-\nabla_\theta J(\theta) = \mathbb{E} \left[ \nabla_\theta \log \pi_\theta(a|s) \cdot A^{\text{GAE}}_t \right]
+\nabla_\theta J(\theta) = \mathbb{E} \left[ \nabla_\theta \log \pi_\theta(a|s) \cdot A^{\text{GAE}}_t \right]
 $$
 
 
@@ -1516,6 +1516,10 @@ PPO 依赖于 Actor + Critic + 裁剪 + KL 惩罚框架。然而，在大型语�
 同时，GRPO**保留**了 PPO 的裁剪和 KL 机制，以确保稳定、合规的更新。
 
 ![image-20250328112640515](pic/image-20250328112640515.png)
+
+
+
+![image-20250417100511533](pic/image-20250417100511533.png)
 
 # DPO：Direct Preference Optimization
 
