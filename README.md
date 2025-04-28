@@ -1486,6 +1486,8 @@ Reward Model: 选择比当前模型性能不弱的模型
 其中，ϵ 和 β 是超参数，A^i,j​ 是基于组内奖励的相对优势估计。与 PPO 不同，GRPO 通过直接使用奖励模型的输出来估计基线，避免了训练一个复杂的值函数。此外，GRPO 通过直接在损失函数中加入策略模型和参考模型之间的 KL 散度来正则化，而不是在奖励中加入 KL 惩罚项，从而简化了训练过程。
 ```
 
+![image-20250417224933217](pic/image-20250417224933217.png)
+
 ## 总结
 
 - **Critic 的作用**：为每个状态提供“合理预期”，显著减少训练方差。
@@ -1554,24 +1556,45 @@ PPO 依赖于 Actor + Critic + 裁剪 + KL 惩罚框架。然而，在大型语�
 ```
 yw是更受偏好的回答，yl是不被偏好的
 
-Loss是由reward计算出来的
+Bradly-Terry的Loss函数
 ```
 
 ![image-20250329100437851](pic/image-20250329100437851.png)
 
 ```
 为了避免计算reward
+
+推导过程：
+以PPO为优化目标产生最优Policy的条件下推出了reward的表达式，然后将该reward表达式代入了以Bradley-Terry模型建模的loss函数中，即可得到DPO的Loss
 ```
 
 ![image-20250329100530039](pic/image-20250329100530039.png)
 
 https://www.bilibili.com/video/BV1GF4m1L7Nt/?spm_id_from=333.1387.upload.video_card.click&vd_source=edb614e9f3e817577f46a2e9deeca011
 
-**以PPO为优化目标产生最优Policy的条件下推出了reward的表达式，然后将该reward表达式代入了以Bradley-Terry模型建模的最大似然估计中，即可得到DPO的Loss**
-
 DPO与PPO的目标是一致的，PPO以强化学习的方式实现了这个目标的优化，DPO认为这个目标有一个解析解，所以把这个解析解推导了出来，最后得到了DPO的loss
 
 ![image-20250329101039347](pic/image-20250329101039347.png)
+
+```
+Bradley-Terry 模型主要用于评估不同项目之间的相对强度或偏好。
+```
+
+![image-20250428102420036](pic/image-20250428102420036.png)
+
+![image-20250428102449723](pic/image-20250428102449723.png)
+
+![image-20250428102634134](pic/image-20250428102634134.png)
+
+![image-20250428102844679](pic/image-20250428102844679.png)
+
+
+
+
+
+
+
+
 
 ## 总结
 
