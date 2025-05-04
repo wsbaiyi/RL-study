@@ -1297,6 +1297,24 @@ $$
 
 ### **2. 为什么需要GAE？**
 直接计算优势函数需要精确的 \( Q(s, a) \) 和 \( V(s) \)，但在实际中：
+
+```
+偏差计算
+按照检验估计量无偏性的思路，检查估计量的期望与估计量之间是否相等
+
+TD低偏差
+显然MC算法对状态值的估计量是无偏估计量。
+TD高方差
+因轨迹随机性
+
+TD低方差
+由于估计量中的随机变量维度较少，即只有当前时刻的回报值R，以及下一时刻的状态s_t+1，使估计量的方差能够保持在较低水平。
+TD高偏差
+近似值函数与真实的值函数之间一直存在误差偏估计量。
+```
+
+
+
 - **蒙特卡洛（MC）方法**：通过完整轨迹计算回报，无偏但**方差高**（因轨迹随机性）。
 - **时序差分（TD）方法**：通过一步预测估计回报，低方差但有**偏差**（因依赖不完美的价值函数估计）。
 
@@ -1472,6 +1490,43 @@ Reward Model: 选择比当前模型性能不弱的模型
 ```
 
 # GRPO Group Relative Policy Optimization:
+
+```
+强化学习top downs
+
+value-based：训练value model，判断这一状态赢得概率大小
+
+policy-based：训练policy model，判断采取动作后赢得概率是多少
+使用policy gradient方法
+
+1：普通pretrain/sft更新参数: theta=theta-a*gradient 减号-->min loss
+	rl：theta=theta+a*gradient*reward  加号-->max reward 
+
+2：gradient：代表如何加强的这一方向，让概率更大
+	reward：代表某一动作得到的reward
+
+3：但是有high varience 
+	因为平时reward通常为0，但某次突然特别大，导致对policy做很大改变，策略可能不收敛
+	因此-baseline
+
+4：advantage actor critic A2C
+	引入advantage，知道哪个action导致reward更大，以及如何增强
+
+5：trpo
+	ppo是trpo的简化，grpo是ppo的简化
+	ration*advantage，trpo引入了重要性采样比率ratio（修正）和KL散度（防止新旧策略差别大，<=KL_target）
+	
+6：ppo使用更简单的clip代替复杂的KL计算
+
+
+7：grpo丢弃critic model
+	如何计算baseline（对同一问题给出多个输出，得到多个reward，做normalization）
+	三个限速器：min; clip; KL
+```
+
+
+
+
 
 ![image-20250327151917068](pic/image-20250327151917068.png)
 
